@@ -31,6 +31,11 @@
 #include <ext4fs.h>
 #include <mmc.h>
 
+// JDB
+#ifdef CONFIG_BOOTDEV_DETECT
+#include "../board/kubos/pumpkin-mbm2/bootdev_detect.h"
+#endif
+
 char *env_name_spec = "EXT4";
 
 env_t *env_ptr;
@@ -58,19 +63,32 @@ int saveenv(void)
 	err = env_export(&env_new);
 	if (err)
 		return err;
-
-	part = blk_get_device_part_str(EXT4_ENV_INTERFACE,
-					EXT4_ENV_DEVICE_AND_PART,
-					&dev_desc, &info, 1);
-	if (part < 0)
+    
+#ifdef CONFIG_BOOTDEV_DETECT
+    part = blk_get_device_part_str(EXT4_ENV_INTERFACE,
+				    get_env_devpart(),
+				    &dev_desc, &info, 1);   
+    printf("Saving %s to %s%s (using BOOTDEV_DETECT)\n", EXT4_ENV_FILE, 
+        EXT4_ENV_INTERFACE, get_env_devpart());					     
+#else
+    part = blk_get_device_part_str(EXT4_ENV_INTERFACE,
+				    EXT4_ENV_DEVICE_AND_PART,
+				    &dev_desc, &info, 1);			
+    printf("Saving %s to %s%s\n", EXT4_ENV_FILE, EXT4_ENV_INTERFACE, 
+        EXT4_ENV_DEVICE_AND_PART);							    	
+#endif /* CONFIG_BOOTDEV_DETECT */
+    
+  	if (part < 0) {
+	    printf("\n** Unable to get device/partition for saveenv **\n");
 		return 1;
+	}
 
-	dev = dev_desc->devnum;
+	dev = dev_desc->devnum;	       
 	ext4fs_set_blk_dev(dev_desc, &info);
 
 	if (!ext4fs_mount(info.size)) {
-		printf("\n** Unable to use %s %s for saveenv **\n",
-		       EXT4_ENV_INTERFACE, EXT4_ENV_DEVICE_AND_PART);
+		printf("\n** Unable to use %s%d:%d for saving environment **\n",
+		       EXT4_ENV_INTERFACE, dev, part);
 		return 1;
 	}
 
@@ -78,7 +96,7 @@ int saveenv(void)
 	ext4fs_close();
 
 	if (err == -1) {
-		printf("\n** Unable to write \"%s\" from %s%d:%d **\n",
+		printf("\n** Unable to write \"%s\" to %s%d:%d **\n",
 			EXT4_ENV_FILE, EXT4_ENV_INTERFACE, dev, part);
 		return 1;
 	}
@@ -96,19 +114,32 @@ void env_relocate_spec(void)
 	int dev, part;
 	int err;
 	loff_t off;
-
-	part = blk_get_device_part_str(EXT4_ENV_INTERFACE,
-					EXT4_ENV_DEVICE_AND_PART,
-					&dev_desc, &info, 1);
-	if (part < 0)
+    
+#ifdef CONFIG_BOOTDEV_DETECT
+    part = blk_get_device_part_str(EXT4_ENV_INTERFACE,
+				    get_env_devpart(),
+				    &dev_desc, &info, 1);   
+    printf("Loading %s from %s%s (using BOOTDEV_DETECT)\n", EXT4_ENV_FILE, 
+        EXT4_ENV_INTERFACE, get_env_devpart());					     
+#else
+    part = blk_get_device_part_str(EXT4_ENV_INTERFACE,
+				    EXT4_ENV_DEVICE_AND_PART,
+				    &dev_desc, &info, 1);			
+    printf("Loading %s from %s%s\n", EXT4_ENV_FILE, EXT4_ENV_INTERFACE, 
+        EXT4_ENV_DEVICE_AND_PART);							    	
+#endif /* CONFIG_BOOTDEV_DETECT */
+    
+  	if (part < 0) {
+	    printf("\n** Unable to get device/partition for environment **\n");
 		goto err_env_relocate;
-
+	}
+		
 	dev = dev_desc->devnum;
 	ext4fs_set_blk_dev(dev_desc, &info);
 
 	if (!ext4fs_mount(info.size)) {
-		printf("\n** Unable to use %s %s for loading the env **\n",
-		       EXT4_ENV_INTERFACE, EXT4_ENV_DEVICE_AND_PART);
+		printf("\n** Unable to use %s%d:%d  for loading the env **\n",
+		       EXT4_ENV_INTERFACE, dev, part);
 		goto err_env_relocate;
 	}
 

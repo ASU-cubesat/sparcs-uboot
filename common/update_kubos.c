@@ -22,6 +22,11 @@
 #include <mmc.h>
 #include <kubos.h>
 #include <dfu.h>
+
+#ifdef CONFIG_BOOTDEV_DETECT
+#include "../board/kubos/pumpkin-mbm2/bootdev_detect.h"
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define UPDATE_COUNT_ENVAR "kubos_updatecount"
@@ -229,8 +234,11 @@ int update_kubos(bool upgrade)
     }
 
     /*
-     * Get and upgrade device number
+     * Get upgrade file device number
      */
+#ifdef CONFIG_BOOTDEV_DETECT    
+    dev_num = get_upgrade_device();
+#else
     if ((env_addr = getenv(DEV_ENVAR)) != NULL)
     {
         dev_num = simple_strtoul(env_addr, NULL, 16);
@@ -239,14 +247,15 @@ int update_kubos(bool upgrade)
     {
         dev_num = KUBOS_UPGRADE_DEVICE;
     }
+#endif /* CONFIG_BOOTDEV_DETECT */
 
     /*
-     * Load the SD card
+     * Load the device
      */
     mmc = find_mmc_device(dev_num);
     if (!mmc)
     {
-        printf("ERROR: Could not access SD card\n");
+        printf("ERROR: Could not access device: mmc%lu\n", dev_num);
         return KUBOS_ERR_NO_REBOOT;
 
     }
@@ -254,7 +263,7 @@ int update_kubos(bool upgrade)
     ret = mmc_init(mmc);
     if (ret)
     {
-        printf("ERROR: Could not init SD card - %d\n", ret);
+        printf("ERROR: Could not init device - %d\n", ret);
         return KUBOS_ERR_NO_REBOOT;
     }
 
@@ -266,8 +275,11 @@ int update_kubos(bool upgrade)
     }
 
     /*
-     * Get and mount the upgrade partition
+     * Get and mount the upgrade file partition
      */
+#ifdef CONFIG_BOOTDEV_DETECT    
+    dev_num = get_upgrade_partition();
+#else     
     if ((env_addr = getenv(PART_ENVAR)) != NULL)
     {
         part = simple_strtoul(env_addr, NULL, 16);
@@ -276,6 +288,7 @@ int update_kubos(bool upgrade)
     {
         part = KUBOS_UPGRADE_PART;
     }
+#endif /* CONFIG_BOOTDEV_DETECT */
 
     if (part_get_info(&mmc->block_dev, part, &part_info))
     {
@@ -329,7 +342,11 @@ int update_kubos(bool upgrade)
         }
         else
         {
+#ifdef CONFIG_BOOTDEV_DETECT
+            if ((dfu_info = get_dfu_alt_info_mmc()) == NULL)      
+#else        
             if ((dfu_info = getenv("dfu_alt_info_mmc")) == NULL)
+#endif
             {
                 printf("ERROR: Can't upgrade mmc files, dfu_alt_info_mmc not defined\n");
                 return KUBOS_ERR_REBOOT;

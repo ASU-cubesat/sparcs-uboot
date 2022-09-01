@@ -40,7 +40,7 @@
 #define KUBOS_CURR_VERSION "kubos_curr_version"
 #define KUBOS_PREV_VERSION "kubos_prev_version"
 #define KUBOS_CURR_TRIED   "kubos_curr_tried"
-#define KUBOS_BASE         "kpack-base.itb"
+#define KUBOS_BASE         "update-pack.itb"
 #define KUBOS_UPDATE_FILE  "kubos_updatefile"
 
 #define KUBOS_UPDATE_ARGS \

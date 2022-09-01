@@ -31,6 +31,10 @@ config CONS_INDEX
 	  board you may want something other than UART0 as for example the IDK
 	  uses UART3 so enter 4 here.
 
+config BOOTDEV_DETECT
+    bool "Use automatic detection of boot device"
+    default y
+    
 source "board/ti/common/Kconfig"
 
 endif

@@ -36,6 +36,11 @@
 #include "../common/board_detect.h"
 #include "board.h"
 
+#ifdef CONFIG_BOOTDEV_DETECT
+#include "../../kubos/pumpkin-mbm2/bootdev_detect.h"
+#endif
+
+
 DECLARE_GLOBAL_DATA_PTR;
 
 /* GPIO that controls power to DDR on EVM-SK */
@@ -539,6 +544,11 @@ static struct clk_synth cdce913_data = {
  */
 int board_init(void)
 {
+
+#ifdef CONFIG_BOOTDEV_DETECT
+	save_omap_boot_params();
+#endif
+
 #if defined(CONFIG_HW_WATCHDOG)
 	hw_watchdog_init();
 #endif
@@ -581,6 +591,10 @@ int board_late_init(void)
 	if (board_is_bbg1())
 		name = "BBG1";
 	set_board_info_env(name);
+#endif
+
+#ifdef CONFIG_BOOTDEV_DETECT
+    set_env_param_bootdev();
 #endif
 
 	return 0;

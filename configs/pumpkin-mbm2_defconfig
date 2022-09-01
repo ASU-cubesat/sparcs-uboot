@@ -51,6 +51,9 @@ CONFIG_FIT=y
 CONFIG_FIT_VERBOSE=y
 CONFIG_FIT_SIGNATURE=y
 
-# Use the kubos image update feature -- requires the kubos modified u-boot
+# Use the kubos image update feature
 CONFIG_UPDATE_KUBOS=y
+
+# Use the bootdev_detect instead of hardcoded device and partition settings
+CONFIG_BOOTDEV_DETECT=y
 
