@@ -56,7 +56,7 @@
 /* If using boot device detection instead of hard coded device info */
 #ifdef CONFIG_BOOTDEV_DETECT
     #define BOOTDEV_DETECT_ENV_PART    3 /* U-boot environment partition if using BOOTDEV_DETECT */
-    #define BOOTDEV_DETECT_ENV_PARAM   "boot_dev_detect" /* U-boot environment parameter used to store the detected boot device*/
+    #define BOOTDEV_DETECT_ENV_PARAM   boot_dev_detect /* U-boot environment parameter used to store the detected boot device*/
     #undef BOOTDEV_DETECT_ENV_SAVE     /* Saves the environment back to disk after adding the detected boot device in PARAM */  
 #endif
 
@@ -119,16 +119,18 @@
 
 #define BOOTENV_DEV_NAME_LEGACY_MMC_DEV(devtypeu, devtypel, instance) \
     #devtypel " "
+
+#define stringizer( s ) #s
     
 #ifdef CONFIG_BOOTDEV_DETECT
     #define BOOT_TARGET_DEVICES(func) \
-        func(LEGACY_MMC_DEV, legacy_mmc_bootdev_detect, "${{" BOOTDEV_DETECT_ENV_PARAM "}") \
-        func(LEGACY_MMC_DEV, legacy_mmc_dev, "${{boot_dev}") \
+        func(LEGACY_MMC_DEV, legacy_mmc_bootdev_detect, ${BOOTDEV_DETECT_ENV_PARAM}) \
+        func(LEGACY_MMC_DEV, legacy_mmc_dev, ${boot_dev}) \
         func(LEGACY_MMC, legacy_mmc, 0) \
         func(LEGACY_MMC, legacy_mmc, 1)
 #else
     #define BOOT_TARGET_DEVICES(func) \
-        func(LEGACY_MMC_DEV, legacy_mmc_dev, "${boot_dev}") \
+        func(LEGACY_MMC_DEV, legacy_mmc_dev, ${boot_dev}) \
         func(LEGACY_MMC, legacy_mmc, 0) \
         func(LEGACY_MMC, legacy_mmc, 1)
 #endif
