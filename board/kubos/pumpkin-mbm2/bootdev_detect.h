@@ -83,8 +83,8 @@
         snprintf(devstr, 8, "%d", get_env_device());  
              
         printf("Setting %s environment variable to %s\n", 
-            stringizer(BOOTDEV_DETECT_ENV_PARAM), devstr);
-        setenv(stringizer(BOOTDEV_DETECT_ENV_PARAM), devstr);
+            BOOTDEV_DETECT_ENV_PARAM, devstr);
+        setenv(BOOTDEV_DETECT_ENV_PARAM, devstr);
         
         #ifdef BOOTDEV_DETECT_ENV_SAVE
             printf("Saving environment\n");

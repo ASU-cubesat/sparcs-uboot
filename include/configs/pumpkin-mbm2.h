@@ -56,7 +56,7 @@
 /* If using boot device detection instead of hard coded device info */
 #ifdef CONFIG_BOOTDEV_DETECT
     #define BOOTDEV_DETECT_ENV_PART    3 /* U-boot environment partition if using BOOTDEV_DETECT */
-    #define BOOTDEV_DETECT_ENV_PARAM   boot_dev_detect /* U-boot environment parameter used to store the detected boot device*/
+    #define BOOTDEV_DETECT_ENV_PARAM   "boot_detect" /* U-boot environment parameter used to store the detected boot device*/
     #undef BOOTDEV_DETECT_ENV_SAVE     /* Saves the environment back to disk after adding the detected boot device in PARAM */  
 #endif
 
@@ -106,31 +106,29 @@
     This defines several boot commands that use different devices for loading
     the linux rootfs.  It also makes an ordered list in which they are attempted
     by distro_bootcmd.  The order is top to bottom.  The standard LEGACY_MMC 
-    templates are defined in am335x_evm.h, but here we want to fix add a format 
+    templates are defined in am335x_evm.h, but here we want to add a format 
     that reads an environment parameter to uses it for device on which the 
     rootfs resides. The new templates are named LEGACY_MMC_DEV and defined in 
     the first two macros below.
-*/
-#define BOOTENV_DEV_LEGACY_MMC_DEV(devtypeu, devtypel, instance) \
+*/   
+#define BOOTENV_DEV_LEGACY_MMC_ENV_PARAM(devtypeu, devtypel, envparam) \
     "bootcmd_" #devtypel "=" \
-    "setenv mmcdev " #instance"; "\
-    "setenv bootpart " #instance":2 ; "\
+    "setenv mmcdev ${" #envparam "}; " \
+    "setenv bootpart ${" #envparam "}:2; " \
     "run mmcboot\0"
 
-#define BOOTENV_DEV_NAME_LEGACY_MMC_DEV(devtypeu, devtypel, instance) \
+#define BOOTENV_DEV_NAME_LEGACY_MMC_ENV_PARAM(devtypeu, devtypel, envparam) \
     #devtypel " "
-
-#define stringizer( s ) #s
-    
+   
 #ifdef CONFIG_BOOTDEV_DETECT
     #define BOOT_TARGET_DEVICES(func) \
-        func(LEGACY_MMC_DEV, legacy_mmc_bootdev_detect, ${BOOTDEV_DETECT_ENV_PARAM}) \
-        func(LEGACY_MMC_DEV, legacy_mmc_dev, ${boot_dev}) \
+        func(LEGACY_MMC_ENV_PARAM, legacy_mmc_boot_detect, boot_detect) \
+        func(LEGACY_MMC_ENV_PARAM, legacy_mmc_boot_dev, boot_dev) \
         func(LEGACY_MMC, legacy_mmc, 0) \
         func(LEGACY_MMC, legacy_mmc, 1)
 #else
     #define BOOT_TARGET_DEVICES(func) \
-        func(LEGACY_MMC_DEV, legacy_mmc_dev, ${boot_dev}) \
+        func(LEGACY_MMC_ENV_PARAM, legacy_mmc_dev, boot_dev) \
         func(LEGACY_MMC, legacy_mmc, 0) \
         func(LEGACY_MMC, legacy_mmc, 1)
 #endif
@@ -141,7 +139,7 @@
         DEFAULT_LINUX_BOOT_ENV \
         "args_mmc=run finduuid;setenv bootargs console=${console} " \
             "${optargs} " \
-            "root=PARTUUID=${uuid} ro " \
+            "root=/dev/mmcblk${mmcdev}p2 ro " \
             "rootfstype=${mmcrootfstype}\0" \
         "bootfile=kernel\0" \
         "boot_dev=0\0" \
