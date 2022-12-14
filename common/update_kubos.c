@@ -278,7 +278,7 @@ int update_kubos(bool upgrade)
      * Get and mount the upgrade file partition
      */
 #ifdef CONFIG_BOOTDEV_DETECT    
-    dev_num = get_upgrade_partition();
+    part = get_upgrade_partition();
 #else     
     if ((env_addr = getenv(PART_ENVAR)) != NULL)
     {
