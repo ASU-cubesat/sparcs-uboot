@@ -201,6 +201,7 @@ int update_kubos(bool upgrade)
     char * file;
     char * env_addr;
     char * dfu_info;
+    char * devstring;
     loff_t actlen;
     ulong addr, dev_num, part = 0;
 
@@ -259,6 +260,10 @@ int update_kubos(bool upgrade)
         return KUBOS_ERR_NO_REBOOT;
 
     }
+    /*
+     *  Need to store the device number as a string for later
+     */
+    sprintf(devstring, "%u", dev_num);
 
     ret = mmc_init(mmc);
     if (ret)
@@ -337,7 +342,7 @@ int update_kubos(bool upgrade)
             else
             {
                 /* The "0" parameter isn't used for NOR flash, but it has to be non-NULL */
-                ret = update_tftp(addr, "nor", "0");
+                ret = update_tftp(addr, "nor", devstring);
             }
         }
         else
@@ -360,7 +365,7 @@ int update_kubos(bool upgrade)
              * to specify a non-zero mmc device number.
              */
             printf("Calling update_tftp\n");
-            ret = update_mmc(file, (void *) addr, "0");
+            ret = update_mmc(file, (void *) addr, devstring);
         }
 
         if (ret)
