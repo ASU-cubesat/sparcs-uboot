@@ -121,10 +121,14 @@
         static inline char* get_dfu_alt_info_mmc(void)
         {
             static char dfu_info[256];	    
-            snprintf(dfu_info, 256, getenv("dfu_alt_info_mmc"), 
-                get_upgrade_device());
-                
-            printf("Using BOOTDEV_DETECT dfu_info:\n%s\n", dfu_info);
+            int upgrade_dev = get_upgrade_device();
+
+            /*
+             * We need three copies of upgrade_dev because U-Boot does not support the %1$
+             * syntax to "lock" everything to the first variable and we have 3 %1d's in our dfu_string
+             */
+            snprintf(dfu_info, 256, getenv("dfu_alt_info_mmc"), upgrade_dev, upgrade_dev, upgrade_dev);
+
             return dfu_info;
         }
 

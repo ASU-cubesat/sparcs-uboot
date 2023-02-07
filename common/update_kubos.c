@@ -238,7 +238,7 @@ int update_kubos(bool upgrade)
     /*
      * Get upgrade file device number
      */
-#ifdef CONFIG_BOOTDEV_DETECT    
+#ifdef CONFIG_BOOTDEV_DETECT
     dev_num = get_upgrade_device();
 #else
     if ((env_addr = getenv(DEV_ENVAR)) != NULL)
@@ -283,9 +283,9 @@ int update_kubos(bool upgrade)
     /*
      * Get and mount the upgrade file partition
      */
-#ifdef CONFIG_BOOTDEV_DETECT    
+#ifdef CONFIG_BOOTDEV_DETECT
     part = get_env_partition();
-#else     
+#else
     if ((env_addr = getenv(PART_ENVAR)) != NULL)
     {
         part = simple_strtoul(env_addr, NULL, 16);
@@ -333,8 +333,6 @@ int update_kubos(bool upgrade)
 
             ret = ext4_read_file(file, (void *)addr, 0, 0, &actlen);
 
-            printf("ext4_read_file RC: %d. Size: %lld\n", ret, actlen);
-
             if (ret < 0)
             {
                 printf("ERROR: Couldn't read %s file - %d\n", file, ret);
@@ -349,8 +347,8 @@ int update_kubos(bool upgrade)
         else
         {
 #ifdef CONFIG_BOOTDEV_DETECT
-            if ((dfu_info = get_dfu_alt_info_mmc()) == NULL)      
-#else        
+            if ((dfu_info = get_dfu_alt_info_mmc()) == NULL)
+#else
             if ((dfu_info = getenv("dfu_alt_info_mmc")) == NULL)
 #endif
             {
@@ -420,4 +418,3 @@ int update_kubos(bool upgrade)
 
     return KUBOS_OK_REBOOT;
 }
-
