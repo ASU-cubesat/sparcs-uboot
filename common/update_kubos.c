@@ -201,8 +201,10 @@ int update_kubos(bool upgrade)
     char * file;
     char * env_addr;
     char * dfu_info;
-    // MMCs should only be 1 or 2
-    char * devstring = malloc(sizeof(ulong));
+    // MMCs should only be 1 or 2 digits
+    // add 2 extra bytes to account for null terminator
+    // and overhead on mmc counts
+    char devstring[4];
     loff_t actlen;
     ulong addr, dev_num, part = 0;
 
