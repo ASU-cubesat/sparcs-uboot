@@ -80,9 +80,9 @@
     #ifdef CONFIG_BOOTDEV_DETECT
         #define DFU_ALT_INFO_MMC \
             "dfu_alt_info_mmc=" \
-	        "kernel fat %1$d 1;" \
-	        "rootfs part %1$d 2;" \
-	        "pumpkin-mbm2.dtb fat %1$d 1" \
+	        "kernel fat %1d 1;" \
+	        "rootfs part %1d 2;" \
+	        "pumpkin-mbm2.dtb fat %1d 1" \
 	        "\0"
     #else
         #define DFU_ALT_INFO_MMC \

@@ -201,6 +201,10 @@ int update_kubos(bool upgrade)
     char * file;
     char * env_addr;
     char * dfu_info;
+    // MMCs should only be 1 or 2 digits
+    // add 2 extra bytes to account for null terminator
+    // and overhead on mmc counts
+    char devstring[4];
     loff_t actlen;
     ulong addr, dev_num, part = 0;
 
@@ -236,7 +240,7 @@ int update_kubos(bool upgrade)
     /*
      * Get upgrade file device number
      */
-#ifdef CONFIG_BOOTDEV_DETECT    
+#ifdef CONFIG_BOOTDEV_DETECT
     dev_num = get_upgrade_device();
 #else
     if ((env_addr = getenv(DEV_ENVAR)) != NULL)
@@ -259,6 +263,10 @@ int update_kubos(bool upgrade)
         return KUBOS_ERR_NO_REBOOT;
 
     }
+    /*
+     *  Need to store the device number as a string for later
+     */
+    sprintf(devstring, "%lu", dev_num);
 
     ret = mmc_init(mmc);
     if (ret)
@@ -277,9 +285,9 @@ int update_kubos(bool upgrade)
     /*
      * Get and mount the upgrade file partition
      */
-#ifdef CONFIG_BOOTDEV_DETECT    
-    dev_num = get_upgrade_partition();
-#else     
+#ifdef CONFIG_BOOTDEV_DETECT
+    part = get_env_partition();
+#else
     if ((env_addr = getenv(PART_ENVAR)) != NULL)
     {
         part = simple_strtoul(env_addr, NULL, 16);
@@ -327,8 +335,6 @@ int update_kubos(bool upgrade)
 
             ret = ext4_read_file(file, (void *)addr, 0, 0, &actlen);
 
-            printf("ext4_read_file RC: %d. Size: %lld\n", ret, actlen);
-
             if (ret < 0)
             {
                 printf("ERROR: Couldn't read %s file - %d\n", file, ret);
@@ -337,14 +343,14 @@ int update_kubos(bool upgrade)
             else
             {
                 /* The "0" parameter isn't used for NOR flash, but it has to be non-NULL */
-                ret = update_tftp(addr, "nor", "0");
+                ret = update_tftp(addr, "nor", devstring);
             }
         }
         else
         {
 #ifdef CONFIG_BOOTDEV_DETECT
-            if ((dfu_info = get_dfu_alt_info_mmc()) == NULL)      
-#else        
+            if ((dfu_info = get_dfu_alt_info_mmc()) == NULL)
+#else
             if ((dfu_info = getenv("dfu_alt_info_mmc")) == NULL)
 #endif
             {
@@ -360,7 +366,7 @@ int update_kubos(bool upgrade)
              * to specify a non-zero mmc device number.
              */
             printf("Calling update_tftp\n");
-            ret = update_mmc(file, (void *) addr, "0");
+            ret = update_mmc(file, (void *) addr, devstring);
         }
 
         if (ret)
@@ -414,4 +420,3 @@ int update_kubos(bool upgrade)
 
     return KUBOS_OK_REBOOT;
 }
-
