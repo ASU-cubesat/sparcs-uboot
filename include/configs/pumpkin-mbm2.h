@@ -56,7 +56,7 @@
 /* If using boot device detection instead of hard coded device info */
 #ifdef CONFIG_BOOTDEV_DETECT
 #define BOOTDEV_DETECT_ENV_PART 3              /* U-boot environment partition if using BOOTDEV_DETECT */
-#define BOOTDEV_DETECT_UPGRADE_PART 4          /* U-boot environment partition if using BOOTDEV_DETECT */
+#define BOOTDEV_DETECT_UPGRADE_PART 5          /* U-boot environment partition if using BOOTDEV_DETECT */
 #define BOOTDEV_DETECT_ENV_PARAM "boot_detect" /* U-boot environment parameter used to store the detected boot device*/
 #undef BOOTDEV_DETECT_ENV_SAVE                 /* Saves the environment back to disk after adding the detected boot device in PARAM */
 #endif
